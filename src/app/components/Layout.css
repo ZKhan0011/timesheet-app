@@ -1,0 +1,161 @@
+.layout {
+  min-height: 100vh;
+  background-color: #000;
+}
+
+.header {
+  background-color: #000;
+  border-bottom: 1px solid #84cc16;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.header-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 4rem;
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logo-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  background-color: #84cc16;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-icon .icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: #000;
+}
+
+.app-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 0;
+}
+
+.app-subtitle {
+  font-size: 0.75rem;
+  color: #a3e635;
+  margin: 0;
+}
+
+.user-section {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.user-info {
+  text-align: right;
+}
+
+@media (max-width: 640px) {
+  .user-info {
+    display: none;
+  }
+}
+
+.user-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #fff;
+  margin: 0;
+}
+
+.user-role {
+  font-size: 0.75rem;
+  color: #a3e635;
+  margin: 0;
+}
+
+.user-avatar {
+  width: 2.5rem;
+  height: 2.5rem;
+  background: linear-gradient(to bottom right, #84cc16, #65a30d);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000;
+  font-weight: 600;
+}
+
+.navigation {
+  background-color: #000;
+  border-bottom: 1px solid #84cc16;
+}
+
+.nav-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.nav-items {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-bottom: 2px solid transparent;
+  color: #9ca3af;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.nav-link:hover {
+  color: #a3e635;
+  border-bottom-color: #65a30d;
+}
+
+.nav-link.active {
+  color: #84cc16;
+  border-bottom-color: #84cc16;
+}
+
+.nav-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.nav-label {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .nav-label {
+    display: inline;
+  }
+}
+
+.main-content {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
