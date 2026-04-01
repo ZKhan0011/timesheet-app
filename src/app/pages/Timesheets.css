@@ -1,0 +1,248 @@
+.timesheets-page {
+  color: #fff;
+}
+
+.timesheets-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.week-select {
+  width: 16rem;
+  padding: 0.5rem 0.75rem;
+  background-color: #000;
+  border: 1px solid #84cc16;
+  border-radius: 0.375rem;
+  color: #fff;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.week-select:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #000, 0 0 0 4px #84cc16;
+}
+
+.week-summary-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.week-info {
+  font-size: 0.875rem;
+  color: #9ca3af;
+  margin: 0.25rem 0 0 0;
+}
+
+.badge-icon {
+  width: 0.75rem;
+  height: 0.75rem;
+  margin-right: 0.25rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 0;
+}
+
+.empty-message {
+  color: #9ca3af;
+  margin: 0 0 0.5rem 0;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: #84cc16;
+  font-size: 0.875rem;
+  cursor: pointer;
+  text-decoration: underline;
+  margin-top: 0.5rem;
+}
+
+.entries-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.entries-table thead tr {
+  border-bottom: 1px solid #374151;
+}
+
+.entries-table th {
+  padding: 0.75rem;
+  text-align: left;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #d1d5db;
+}
+
+.entries-table tbody tr {
+  border-bottom: 1px solid #374151;
+  transition: background-color 0.2s;
+}
+
+.entries-table tbody tr:hover {
+  background-color: #374151;
+}
+
+.entries-table td {
+  padding: 0.75rem;
+  font-size: 0.875rem;
+  color: #d1d5db;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.font-medium {
+  font-weight: 500;
+  color: #fff;
+}
+
+.project-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.project-color {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.project-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #fff;
+  margin: 0 0 0.125rem 0;
+}
+
+.project-client {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin: 0;
+}
+
+.description-cell {
+  max-width: 20rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hours-cell {
+  text-align: right;
+  font-weight: 600;
+  color: #84cc16;
+}
+
+.actions-cell {
+  text-align: right;
+}
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.action-btn {
+  padding: 0.5rem;
+  background: transparent;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.action-btn:hover {
+  background-color: #374151;
+}
+
+.edit-btn {
+  color: #84cc16;
+}
+
+.delete-btn {
+  color: #ef4444;
+}
+
+.action-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.timesheet-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 1rem;
+  margin-top: 1rem;
+  border-top: 1px solid #374151;
+}
+
+.total-hours {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #fff;
+  margin: 0 0 0.25rem 0;
+}
+
+.remaining-hours {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin: 0;
+}
+
+.daily-breakdown-card {
+  margin-top: 1.5rem;
+}
+
+.daily-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.5rem;
+}
+
+.day-cell {
+  text-align: center;
+}
+
+.day-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #9ca3af;
+  margin: 0 0 0.5rem 0;
+}
+
+.day-hours {
+  padding: 0.75rem;
+  background-color: #374151;
+  border-radius: 0.5rem;
+}
+
+.day-hours.has-hours {
+  background-color: rgba(132, 204, 22, 0.2);
+  border: 1px solid #84cc16;
+}
+
+.hours-value {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 0.25rem 0;
+}
+
+.day-date {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin: 0;
+}
