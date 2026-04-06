@@ -8,12 +8,28 @@ export const projects = [
 
 export const timeEntries = [
   {
+    id: '0',
+    projectId: '3',
+    date: '2026-03-12',
+    hours: 8,
+    description: 'validation of data consistency',
+    status: 'submitted',
+  },
+  {
+    id: '9',
+    projectId: '2',
+    date: '2026-03-11',
+    hours: 7,
+    description: 'review of mobile test results',
+    status: 'submitted',
+  },
+  {
     id: '1',
     projectId: '1',
     date: '2026-03-24',
     hours: 8,
     description: 'Frontend component development',
-    status: 'submitted',
+    status: 'draft',
   },
   {
     id: '2',

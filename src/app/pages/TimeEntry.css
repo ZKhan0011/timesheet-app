@@ -1,5 +1,6 @@
 .time-entry-page {
   max-width: 48rem;
+  margin: 0 auto;
 }
 
 .page-header {
@@ -60,6 +61,7 @@
 
 .form-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.75rem;
   padding-top: 1rem;
 }
@@ -196,4 +198,14 @@
   color: #84cc16;
   border-top: 1px solid #1a1a1a;
   padding-top: 0.75rem;
+}
+@media (max-width: 640px) {
+  .form-actions > .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .flex-1 {
+    flex: none;
+  }
 }
