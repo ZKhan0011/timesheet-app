@@ -5,6 +5,7 @@ import { format, startOfWeek, endOfWeek, subWeeks } from 'date-fns';
 import { Link } from 'react-router';
 import { toast } from 'sonner';
 import './Timesheets.css';
+import { Link } from 'react-router';
 
 export function Timesheets() {
   const [selectedWeek, setSelectedWeek] = useState('0');
@@ -118,9 +119,7 @@ export function Timesheets() {
           {weekData.entries.length === 0 ? (
             <div className="empty-state">
               <p className="empty-message">No time entries for this week</p>
-              <Link to="/time-entry" className="btn-link">
-                Add Time Entry
-              </Link>
+              <Link to="/time-entry" className="btn-link">Add Time Entry</Link>
             </div>
           ) : (
             <div>
