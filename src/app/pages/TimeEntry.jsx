@@ -2,34 +2,20 @@ import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Plus, Save } from 'lucide-react';
 import {
   format, startOfWeek, endOfWeek, startOfMonth, endOfMonth,
-  addMonths, subMonths, addDays, isSameMonth, isSameDay,
-  isWithinInterval, eachDayOfInterval
+  addMonths, subMonths, isSameMonth, isSameDay, eachDayOfInterval
 } from 'date-fns';
 import { projects } from '../data/mockData';
 import { toast } from 'sonner';
 import './TimeEntry.css';
 
-function WeekCalendar({ selectedWeekStart, onWeekSelect }) {
-  const [viewMonth, setViewMonth] = useState(selectedWeekStart || new Date());
+function DayCalendar({ selectedDay, onDaySelect }) {
+  const [viewMonth, setViewMonth] = useState(selectedDay || new Date());
 
   const monthStart = startOfMonth(viewMonth);
   const monthEnd = endOfMonth(viewMonth);
-  // Pad to full weeks (Mon–Sun grid)
   const gridStart = startOfWeek(monthStart, { weekStartsOn: 1 });
   const gridEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
   const days = eachDayOfInterval({ start: gridStart, end: gridEnd });
-
-  const weekStart = selectedWeekStart
-    ? startOfWeek(selectedWeekStart, { weekStartsOn: 1 })
-    : null;
-  const weekEnd = weekStart ? endOfWeek(weekStart, { weekStartsOn: 1 }) : null;
-
-  const isInSelectedWeek = (day) =>
-    weekStart && weekEnd && isWithinInterval(day, { start: weekStart, end: weekEnd });
-
-  const handleDayClick = (day) => {
-    onWeekSelect(startOfWeek(day, { weekStartsOn: 1 }));
-  };
 
   return (
     <div className="week-calendar">
@@ -59,9 +45,7 @@ function WeekCalendar({ selectedWeekStart, onWeekSelect }) {
         ))}
 
         {days.map((day) => {
-          const inWeek = isInSelectedWeek(day);
-          const isWeekStart = weekStart && isSameDay(day, weekStart);
-          const isWeekEnd = weekEnd && isSameDay(day, weekEnd);
+          const isSelected = selectedDay && isSameDay(day, selectedDay);
           const isToday = isSameDay(day, new Date());
           const faded = !isSameMonth(day, viewMonth);
 
@@ -69,12 +53,10 @@ function WeekCalendar({ selectedWeekStart, onWeekSelect }) {
             <button
               key={day.toISOString()}
               type="button"
-              onClick={() => handleDayClick(day)}
+              onClick={() => onDaySelect(day)}
               className={[
                 'calendar-day',
-                inWeek ? 'in-week' : '',
-                isWeekStart ? 'week-start' : '',
-                isWeekEnd ? 'week-end' : '',
+                isSelected ? 'selected-day' : '', 
                 isToday ? 'today' : '',
                 faded ? 'faded' : '',
               ].filter(Boolean).join(' ')}
@@ -85,10 +67,9 @@ function WeekCalendar({ selectedWeekStart, onWeekSelect }) {
         })}
       </div>
 
-      {/* Selected week label */}
-      {weekStart && (
+      {selectedDay && (
         <div className="selected-week-label">
-          Week of {format(weekStart, 'MMM d')} – {format(weekEnd, 'MMM d, yyyy')}
+          Selected Date: {format(selectedDay, 'MMMM do, yyyy')}
         </div>
       )}
     </div>
@@ -96,9 +77,7 @@ function WeekCalendar({ selectedWeekStart, onWeekSelect }) {
 }
 
 export function TimeEntry() {
-  const [selectedWeekStart, setSelectedWeekStart] = useState(
-    startOfWeek(new Date(), { weekStartsOn: 1 })
-  );
+  const [selectedDay, setSelectedDay] = useState(new Date());
   const [projectId, setProjectId] = useState('');
   const [hours, setHours] = useState('');
   const [description, setDescription] = useState('');
@@ -109,10 +88,11 @@ export function TimeEntry() {
       toast.error('Please fill in all fields');
       return;
     }
-    const weekEnd = endOfWeek(selectedWeekStart, { weekStartsOn: 1 });
+
     toast.success('Time entry saved successfully!', {
-      description: `${hours} hours logged for week of ${format(selectedWeekStart, 'MMM d')}–${format(weekEnd, 'MMM d, yyyy')}`,
+      description: `${hours} hours logged for ${format(selectedDay, 'MMM d, yyyy')}`,
     });
+
     setProjectId('');
     setHours('');
     setDescription('');
@@ -126,7 +106,7 @@ export function TimeEntry() {
     <div className="time-entry-page">
       <div className="page-header">
         <h2 className="page-title">Log Time</h2>
-        <p className="page-subtitle">Select a week and log your hours</p>
+        <p className="page-subtitle">Select a date and log your hours</p>
       </div>
 
       <div className="card">
@@ -137,10 +117,10 @@ export function TimeEntry() {
           <form onSubmit={handleSubmit} className="time-entry-form">
 
             <div className="form-group">
-              <label className="form-label">Week</label>
-              <WeekCalendar
-                selectedWeekStart={selectedWeekStart}
-                onWeekSelect={setSelectedWeekStart}
+              <label className="form-label">Date</label>
+              <DayCalendar
+                selectedDay={selectedDay}
+                onDaySelect={setSelectedDay}
               />
             </div>
 
@@ -168,8 +148,8 @@ export function TimeEntry() {
                 type="number"
                 step="0.5"
                 min="0"
-                max="168"
-                placeholder="40.0"
+                max="24" 
+                placeholder="8.0"
                 className="form-input"
                 value={hours}
                 onChange={(e) => setHours(e.target.value)}
