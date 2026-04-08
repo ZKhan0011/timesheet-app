@@ -159,7 +159,7 @@
   margin: 0 auto;
   padding: 2rem 1rem;
 }
-/* Sign out button */
+
 .signout-btn {
   display: flex;
   align-items: center;
@@ -179,7 +179,6 @@
   border-color: #ccc;
 }
 
-/* Login */
 .login-wrap {
   display: flex;
   align-items: center;
