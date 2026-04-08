@@ -5,7 +5,6 @@ import { format, startOfWeek, endOfWeek, subWeeks } from 'date-fns';
 import { Link } from 'react-router';
 import { toast } from 'sonner';
 import './Timesheets.css';
-import { Link } from 'react-router';
 
 export function Timesheets() {
   const [selectedWeek, setSelectedWeek] = useState('0');

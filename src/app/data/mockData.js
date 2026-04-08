@@ -88,7 +88,13 @@ export const timeEntries = [
     status: 'approved',
   },
 ];
-
+export const loginData = [
+  { username: 'consultant', password: 'password', role: 'Consultant',  name: 'Consultant' },
+  { username: 'admin',      password: 'password', role: 'Admin',       name: 'Admin'   },
+  { username: 'payroll',    password: 'password', role: 'Payroll',     name: 'Payroll'      },
+];
+export const getUserByCredentials = (username, password) =>
+  loginData.find(u => u.username === username && u.password === password);
 export const getProjectById = (id) => {
   return projects.find(p => p.id === id);
 };
