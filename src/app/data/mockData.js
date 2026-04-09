@@ -10,7 +10,7 @@ export const timeEntries = [
   {
     id: '0',
     projectId: '3',
-    date: '2026-03-12',
+    date: '2026-03-17',
     hours: 8,
     description: 'validation of data consistency',
     status: 'submitted',
@@ -18,7 +18,7 @@ export const timeEntries = [
   {
     id: '9',
     projectId: '2',
-    date: '2026-03-11',
+    date: '2026-03-16',
     hours: 7,
     description: 'review of mobile test results',
     status: 'submitted',
@@ -26,7 +26,7 @@ export const timeEntries = [
   {
     id: '1',
     projectId: '1',
-    date: '2026-03-24',
+    date: '2026-04-01',
     hours: 8,
     description: 'Frontend component development',
     status: 'draft',
@@ -34,7 +34,7 @@ export const timeEntries = [
   {
     id: '2',
     projectId: '1',
-    date: '2026-03-23',
+    date: '2026-03-31',
     hours: 7.5,
     description: 'UI/UX implementation',
     status: 'submitted',
@@ -42,7 +42,7 @@ export const timeEntries = [
   {
     id: '3',
     projectId: '2',
-    date: '2026-03-22',
+    date: '2026-03-29',
     hours: 6,
     description: 'React Native setup and configuration',
     status: 'approved',
@@ -50,7 +50,7 @@ export const timeEntries = [
   {
     id: '4',
     projectId: '3',
-    date: '2026-03-21',
+    date: '2026-03-28',
     hours: 8,
     description: 'Database schema mapping',
     status: 'approved',
@@ -58,7 +58,7 @@ export const timeEntries = [
   {
     id: '5',
     projectId: '2',
-    date: '2026-03-20',
+    date: '2026-03-27',
     hours: 7,
     description: 'API integration',
     status: 'approved',
@@ -66,7 +66,7 @@ export const timeEntries = [
   {
     id: '6',
     projectId: '4',
-    date: '2026-03-19',
+    date: '2026-03-26',
     hours: 8,
     description: 'Penetration testing',
     status: 'approved',
@@ -74,7 +74,7 @@ export const timeEntries = [
   {
     id: '7',
     projectId: '1',
-    date: '2026-03-18',
+    date: '2026-03-25',
     hours: 6.5,
     description: 'Code review and optimization',
     status: 'approved',
@@ -82,7 +82,7 @@ export const timeEntries = [
   {
     id: '8',
     projectId: '5',
-    date: '2026-03-17',
+    date: '2026-03-24',
     hours: 4,
     description: 'Team training session',
     status: 'approved',
