@@ -226,10 +226,25 @@ export function Timesheets() {
                                   className="action-btn delete-btn"
                                   onClick={() => handleDelete(entry.id)}
                                 >
-                                  <Trash2 className="action-icon" />
+                                  <Trash2/>
                                 </button>
-                              </div>
-                            )}
+
+                                <button
+                                  className="action-btn edit-btn"
+                                  onClick={() => handleEdit(entry.id)}
+                                >
+                                  <Edit />
+                                </button>
+
+                                <button
+                                  className="action-btn submit-btn"
+                                  onClick={() => handleSubmitEntry(entry.id)}
+                                >
+                                  <Send />
+                                </button> 
+
+                                  </div>
+                                )}
                           </td>
                         </tr>
                       );
