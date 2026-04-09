@@ -67,35 +67,7 @@ export function Timesheets() {
     }
   };
 
-  const handleSubmitEntry = (id) => {
-    setEntries(prev =>
-      prev.map(entry =>
-        entry.id === id
-          ? { ...entry, status: 'submitted' }
-          : entry
-      )
-    );
 
-    toast.success('Entry submitted');
-  };
-
-  const handleSubmit = () => {
-    if (weekData.hasDraftEntries) {
-      toast.error('Submit all entries first', {
-        description: 'Please submit all of your time entries before submitting the timesheet.',
-      });
-      return;
-    }
-
-    setSubmittedTimesheets((currentSubmittedTimesheets) => ({
-      ...currentSubmittedTimesheets,
-      [selectedWeek]: true,
-    }));
-
-    toast.success('Timesheet submitted!', {
-      description: 'Your timesheet has been sent for approval',
-    });
-  };
 
   return (
     <div className="timesheets-page">
@@ -118,12 +90,7 @@ export function Timesheets() {
         </select>
       </div>
 
-        <button onClick={handleCreate} className="btn btn-secondary">
-          <Plus className="btn-icon" />
-          Add Entry
-        </button>
-      <div>
-      </div>
+
   
 
       <div className="card">
@@ -212,58 +179,17 @@ export function Timesheets() {
                                 <Trash2 className="action-icon" />
                               </button>
                             </div>
-                          </td>
-                          <td className="description-cell">
-                            {entry.description}
-                          </td>
-                          <td className="status-cell">
-                            <span className={`status-badge status-${timesheetEntryStatus}`}>
-                              {timesheetEntryStatus}
-                            </span>
-                          </td>
-                          <td className="hours-cell">
-                            {entry.hours}h
-                          </td>
-                          <td className="actions-cell">
-                            {timesheetEntryStatus === 'draft' && (
-                              <div className="action-buttons">
-                                <button className="action-btn edit-btn">
-                                  <Edit className="action-icon" />
-                                </button>
-                                <button
-                                  className="action-btn delete-btn"
-                                  onClick={() => handleDelete(entry.id)}
-                                >
-                                  <Trash2/>
-                                </button>
-
-                                <button
-                                  className="action-btn edit-btn"
-                                  onClick={() => handleEdit(entry.id)}
-                                >
-                                  <Edit />
-                                </button>
-
-                                <button
-                                  className="action-btn submit-btn"
-                                  onClick={() => handleSubmitEntry(entry.id)}
-                                >
-                                  <Send />
-                                </button> 
-
-                                  </div>
-                                )}
-                          </td>
-                        </tr>
+                          )}
+                        </td>
+                      </tr>
                       );
                     })}
                   </tbody>
                 </table>
-              </div>
 
               <div className="mobile-entry-list">
                 {weekData.entries.map(entry => {
-                  const project = getProjectById(entry.projectId);
+                  const project = entry.project;
                   const timesheetEntryStatus = entry.status;
 
                   return (

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { CalendarIcon, Plus, Save } from 'lucide-react';
-import { format } from 'date-fns';
+import { CalendarIcon, Plus, Save, ChevronLeft, ChevronRight } from 'lucide-react';
+import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, isSameMonth, subMonths, addMonths } from 'date-fns';
 import { fetchProjects, createTimeEntry } from '../data/api';
 import { toast } from 'sonner';
 import './TimeEntry.css';
@@ -98,14 +98,14 @@ export function TimeEntry() {
     try {
       await createTimeEntry({
         projectId: parseInt(projectId),
-        date: format(date, 'yyyy-MM-dd'),
+        date: format(selectedDay, 'yyyy-MM-dd'),
         hours: parseFloat(hours),
         description,
         status: 'draft',
       });
 
       toast.success('Time entry saved successfully!', {
-        description: `${hours} hours logged for ${format(date, 'MMM d, yyyy')}`,
+        description: `${hours} hours logged for ${format(selectedDay, 'MMM d, yyyy')}`,
       });
 
       setProjectId('');
