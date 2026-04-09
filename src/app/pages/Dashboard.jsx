@@ -1,35 +1,62 @@
+import { useState, useEffect } from 'react';
 import { Clock, CheckCircle, AlertCircle, TrendingUp } from 'lucide-react';
-import { projects, timeEntries, getProjectById } from '../data/mockData';
-import { format, startOfWeek, endOfWeek } from 'date-fns';
+import { fetchProjects, fetchTimeEntries, fetchDashboardSummary } from '../data/api';
+import { format } from 'date-fns';
 import { Link } from 'react-router';
 import './Dashboard.css';
 
 export function Dashboard() {
-  const currentWeekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
-  const currentWeekEnd = endOfWeek(new Date(), { weekStartsOn: 1 });
+  const [summary, setSummary] = useState(null);
+  const [recentEntries, setRecentEntries] = useState([]);
+  const [projects, setProjects] = useState([]);
+  const [allEntries, setAllEntries] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const thisWeekEntries = timeEntries.filter(entry => {
-    const entryDate = new Date(entry.date);
-    return entryDate >= currentWeekStart && entryDate <= currentWeekEnd;
-  });
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const [summaryData, projectsData, entriesData] = await Promise.all([
+          fetchDashboardSummary(),
+          fetchProjects(),
+          fetchTimeEntries(),
+        ]);
+        setSummary(summaryData);
+        setProjects(projectsData);
+        setAllEntries(entriesData);
+        // Entries come sorted by -date from the API, take first 5
+        setRecentEntries(entriesData.slice(0, 5));
+      } catch (err) {
+        console.error('Failed to load dashboard data:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, []);
 
-  const thisWeekHours = thisWeekEntries.reduce((sum, entry) => sum + entry.hours, 0);
-  const submittedEntries = timeEntries.filter(e => e.status === 'submitted').length;
-  const approvedEntries = timeEntries.filter(e => e.status === 'approved').length;
-  const totalHours = timeEntries.reduce((sum, entry) => sum + entry.hours, 0);
+  if (loading) {
+    return (
+      <div className="dashboard">
+        <div className="dashboard-header">
+          <div>
+            <h2 className="page-title">Dashboard</h2>
+            <p className="page-subtitle">Loading...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-  const recentEntries = [...timeEntries]
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    .slice(0, 5);
+  const weekLabel = summary
+    ? `Week of ${format(new Date(summary.weekStart), 'MMM d')} - ${format(new Date(summary.weekEnd), 'MMM d, yyyy')}`
+    : '';
 
   return (
     <div className="dashboard">
       <div className="dashboard-header">
         <div>
           <h2 className="page-title">Dashboard</h2>
-          <p className="page-subtitle">
-            Week of {format(currentWeekStart, 'MMM d')} - {format(currentWeekEnd, 'MMM d, yyyy')}
-          </p>
+          <p className="page-subtitle">{weekLabel}</p>
         </div>
         <Link to="/time-entry" className="btn btn-primary">
           <Clock className="btn-icon" />
@@ -44,9 +71,9 @@ export function Dashboard() {
             <span className="stat-label">This Week</span>
             <Clock className="stat-icon" />
           </div>
-          <div className="stat-value">{thisWeekHours}h</div>
+          <div className="stat-value">{summary?.thisWeekHours ?? 0}h</div>
           <p className="stat-description">
-            {40 - thisWeekHours}h remaining to full week
+            {40 - (summary?.thisWeekHours ?? 0)}h remaining to full week
           </p>
         </div>
 
@@ -55,7 +82,7 @@ export function Dashboard() {
             <span className="stat-label">Pending Approval</span>
             <AlertCircle className="stat-icon" />
           </div>
-          <div className="stat-value">{submittedEntries}</div>
+          <div className="stat-value">{summary?.submittedEntries ?? 0}</div>
           <p className="stat-description">
             Awaiting manager review
           </p>
@@ -66,7 +93,7 @@ export function Dashboard() {
             <span className="stat-label">Approved</span>
             <CheckCircle className="stat-icon" />
           </div>
-          <div className="stat-value">{approvedEntries}</div>
+          <div className="stat-value">{summary?.approvedEntries ?? 0}</div>
           <p className="stat-description">
             This month
           </p>
@@ -77,7 +104,7 @@ export function Dashboard() {
             <span className="stat-label">Total Hours</span>
             <TrendingUp className="stat-icon" />
           </div>
-          <div className="stat-value">{totalHours}h</div>
+          <div className="stat-value">{summary?.totalHours ?? 0}h</div>
           <p className="stat-description">
             All time tracked
           </p>
@@ -93,7 +120,7 @@ export function Dashboard() {
           <div className="card-content">
             <div className="entries-list">
               {recentEntries.map(entry => {
-                const project = getProjectById(entry.projectId);
+                const project = entry.project;
                 return (
                   <div key={entry.id} className="entry-item">
                     <div
@@ -131,8 +158,8 @@ export function Dashboard() {
           <div className="card-content">
             <div className="projects-list">
               {projects.map(project => {
-                const projectEntries = timeEntries.filter(e => e.projectId === project.id);
-                const projectHours = projectEntries.reduce((sum, e) => sum + e.hours, 0);
+                const projectEntries = allEntries.filter(e => e.project?.id === project.id);
+                const projectHours = projectEntries.reduce((sum, e) => sum + parseFloat(e.hours), 0);
                 return (
                   <div key={project.id} className="project-item">
                     <div className="project-header">

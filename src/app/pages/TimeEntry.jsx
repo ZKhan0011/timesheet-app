@@ -1,10 +1,7 @@
-import { useState } from 'react';
-import { ChevronLeft, ChevronRight, Plus, Save } from 'lucide-react';
-import {
-  format, startOfWeek, endOfWeek, startOfMonth, endOfMonth,
-  addMonths, subMonths, isSameMonth, isSameDay, eachDayOfInterval
-} from 'date-fns';
-import { projects } from '../data/mockData';
+import { useState, useEffect } from 'react';
+import { CalendarIcon, Plus, Save } from 'lucide-react';
+import { format } from 'date-fns';
+import { fetchProjects, createTimeEntry } from '../data/api';
 import { toast } from 'sonner';
 import './TimeEntry.css';
 
@@ -81,21 +78,46 @@ export function TimeEntry() {
   const [projectId, setProjectId] = useState('');
   const [hours, setHours] = useState('');
   const [description, setDescription] = useState('');
+  const [projects, setProjects] = useState([]);
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    fetchProjects()
+      .then(setProjects)
+      .catch(err => console.error('Failed to load projects:', err));
+  }, []);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!projectId || !hours || !description) {
       toast.error('Please fill in all fields');
       return;
     }
 
-    toast.success('Time entry saved successfully!', {
-      description: `${hours} hours logged for ${format(selectedDay, 'MMM d, yyyy')}`,
-    });
+    setSubmitting(true);
+    try {
+      await createTimeEntry({
+        projectId: parseInt(projectId),
+        date: format(date, 'yyyy-MM-dd'),
+        hours: parseFloat(hours),
+        description,
+        status: 'draft',
+      });
 
-    setProjectId('');
-    setHours('');
-    setDescription('');
+      toast.success('Time entry saved successfully!', {
+        description: `${hours} hours logged for ${format(date, 'MMM d, yyyy')}`,
+      });
+
+      setProjectId('');
+      setHours('');
+      setDescription('');
+    } catch (err) {
+      toast.error('Failed to save time entry', {
+        description: err.message,
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleSaveDraft = () => {
@@ -169,9 +191,9 @@ export function TimeEntry() {
             </div>
 
             <div className="form-actions">
-              <button type="submit" className="btn btn-primary flex-1">
+              <button type="submit" className="btn btn-primary flex-1" disabled={submitting}>
                 <Plus className="btn-icon" />
-                Add Entry
+                {submitting ? 'Saving...' : 'Add Entry'}
               </button>
               <button type="button" className="btn btn-outline" onClick={handleSaveDraft}>
                 <Save className="btn-icon" />
