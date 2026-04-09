@@ -10,12 +10,14 @@ export function Timesheets() {
   const [selectedWeek, setSelectedWeek] = useState('0');
   const [submittedTimesheets, setSubmittedTimesheets] = useState({});
 
+  const [entries, setEntries] = useState(initialEntries);
+
   const getWeekData = (weeksAgo) => {
     const weekStart = startOfWeek(subWeeks(new Date(), weeksAgo), { weekStartsOn: 1 });
     const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
     const hasSubmittedTimesheet = submittedTimesheets[weeksAgo] === true;
     
-    const entries = timeEntries.filter(entry => {
+    const filteredEntries = entries.filter(entry => {
       const entryDate = new Date(entry.date);
       return entryDate >= weekStart && entryDate <= weekEnd;
     });
