@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { CheckCircle, Send, Edit, Trash2 } from 'lucide-react';
-import { fetchTimeEntries, deleteTimeEntry, submitTimeEntry } from '../data/api';
+import { CheckCircle, Send, Edit, Trash2, X } from 'lucide-react';
+import { fetchTimeEntries, deleteTimeEntry, submitTimeEntry, updateTimeEntry } from '../data/api';
 import { format, startOfWeek, endOfWeek, subWeeks } from 'date-fns';
 import { Link } from 'react-router';
 import { toast } from 'sonner';
@@ -12,6 +12,7 @@ export function Timesheets() {
   const [loading, setLoading] = useState(true);
   const [weekStart, setWeekStart] = useState(new Date());
   const [weekEnd, setWeekEnd] = useState(new Date());
+  const [editingEntry, setEditingEntry] = useState(null);
 
   const loadWeekData = async (weeksAgo) => {
     setLoading(true);
@@ -67,6 +68,25 @@ export function Timesheets() {
     }
   };
 
+  const handleEditClick = (entry) => {
+    setEditingEntry({ ...entry });
+  };
+
+  const handleUpdateEntry = async (e) => {
+    e.preventDefault();
+    try {
+      await updateTimeEntry(editingEntry.id, {
+        hours: editingEntry.hours,
+        description: editingEntry.description,
+      });
+      toast.success('Entry updated');
+      setEditingEntry(null);
+      loadWeekData(parseInt(selectedWeek));
+    } catch (err) {
+      toast.error('Failed to update entry', { description: err.message });
+    }
+  };
+
 
 
   return (
@@ -106,14 +126,14 @@ export function Timesheets() {
             </div>
             {weekData.entries.length > 0 && (
               <span className={`status-badge ${
-                weekData.timesheetStatus === 'Approved'
+                weekData.status === 'approved'
                   ? 'status-approved'
-                  : weekData.timesheetStatus === 'Pending Approval'
+                  : weekData.status === 'submitted'
                     ? 'status-submitted'
                     : 'status-draft'
               }`}>
-                {weekData.timesheetStatus === 'Approved' && <CheckCircle className="badge-icon" />}
-                {weekData.timesheetStatus}
+                {weekData.status === 'approved' && <CheckCircle className="badge-icon" />}
+                {weekData.status}
               </span>
             )}
           </div>
@@ -169,7 +189,10 @@ export function Timesheets() {
                         <td className="actions-cell">
                           {entry.status === 'draft' && (
                             <div className="action-buttons">
-                              <button className="action-btn edit-btn">
+                              <button 
+                                className="action-btn edit-btn"
+                                onClick={() => handleEditClick(entry)}
+                              >
                                 <Edit className="action-icon" />
                               </button>
                               <button
@@ -206,7 +229,10 @@ export function Timesheets() {
                       <p className="mobile-entry-description">{entry.description}</p>
                       {timesheetEntryStatus === 'draft' && (
                         <div className="action-buttons mobile-actions">
-                          <button className="action-btn edit-btn">
+                          <button 
+                            className="action-btn edit-btn"
+                            onClick={() => handleEditClick(entry)}
+                          >
                             <Edit className="action-icon" />
                           </button>
                           <button
@@ -222,7 +248,7 @@ export function Timesheets() {
                 })}
               </div>
 
-              {weekData.entries.length > 0 && weekData.timesheetStatus === 'Not Submitted' && (
+              {weekData.entries.length > 0 && weekData.status === 'draft' && (
                 <div className="timesheet-footer">
                   <div>
                     <p className="total-hours">Total Hours: {weekData.totalHours}h</p>
@@ -269,6 +295,53 @@ export function Timesheets() {
                 );
               })}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Entry Modal */}
+      {editingEntry && (
+        <div className="modal-overlay" onClick={() => setEditingEntry(null)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Edit Entry</h3>
+              <button className="close-btn" onClick={() => setEditingEntry(null)}>
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleUpdateEntry} className="modal-form">
+              <div className="form-group">
+                <label>Hours</label>
+                <input
+                  type="number"
+                  step="0.5"
+                  min="0"
+                  max="24"
+                  className="form-input"
+                  value={editingEntry.hours}
+                  onChange={e => setEditingEntry({...editingEntry, hours: e.target.value})}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Description</label>
+                <textarea
+                  className="form-textarea"
+                  rows="3"
+                  value={editingEntry.description}
+                  onChange={e => setEditingEntry({...editingEntry, description: e.target.value})}
+                  required
+                />
+              </div>
+              <div className="modal-actions">
+                <button type="button" className="btn btn-outline" onClick={() => setEditingEntry(null)}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary">
+                  Save Changes
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

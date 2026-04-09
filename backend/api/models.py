@@ -18,6 +18,7 @@ class TimeEntry(models.Model):
         ('draft', 'Draft'),
         ('submitted', 'Submitted'),
         ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
     ]
 
     project = models.ForeignKey(
