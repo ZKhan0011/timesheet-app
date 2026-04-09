@@ -1,46 +1,69 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { CheckCircle, Send, Edit, Trash2 } from 'lucide-react';
-import { timeEntries, getProjectById } from '../data/mockData';
+import { fetchTimeEntries, deleteTimeEntry, submitTimeEntry } from '../data/api';
 import { format, startOfWeek, endOfWeek, subWeeks } from 'date-fns';
 import { toast } from 'sonner';
 import './Timesheets.css';
 
 export function Timesheets() {
   const [selectedWeek, setSelectedWeek] = useState('0');
+  const [weekData, setWeekData] = useState({ entries: [], totalHours: 0, status: 'draft' });
+  const [loading, setLoading] = useState(true);
+  const [weekStart, setWeekStart] = useState(new Date());
+  const [weekEnd, setWeekEnd] = useState(new Date());
 
-  const getWeekData = (weeksAgo) => {
-    const weekStart = startOfWeek(subWeeks(new Date(), weeksAgo), { weekStartsOn: 1 });
-    const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
-    
-    const entries = timeEntries.filter(entry => {
-      const entryDate = new Date(entry.date);
-      return entryDate >= weekStart && entryDate <= weekEnd;
-    });
+  const loadWeekData = async (weeksAgo) => {
+    setLoading(true);
+    try {
+      const ws = startOfWeek(subWeeks(new Date(), weeksAgo), { weekStartsOn: 1 });
+      const we = endOfWeek(ws, { weekStartsOn: 1 });
+      setWeekStart(ws);
+      setWeekEnd(we);
 
-    const totalHours = entries.reduce((sum, entry) => sum + entry.hours, 0);
-    const status = entries.length > 0 ? entries[0].status : 'draft';
+      const entries = await fetchTimeEntries({
+        dateFrom: format(ws, 'yyyy-MM-dd'),
+        dateTo: format(we, 'yyyy-MM-dd'),
+      });
 
-    return {
-      weekStart,
-      weekEnd,
-      entries,
-      totalHours,
-      status,
-    };
+      const totalHours = entries.reduce((sum, entry) => sum + parseFloat(entry.hours), 0);
+      const status = entries.length > 0 ? entries[0].status : 'draft';
+
+      setWeekData({ entries, totalHours, status });
+    } catch (err) {
+      console.error('Failed to load timesheet data:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const weekData = getWeekData(parseInt(selectedWeek));
+  useEffect(() => {
+    loadWeekData(parseInt(selectedWeek));
+  }, [selectedWeek]);
 
-  const handleSubmit = () => {
-    toast.success('Timesheet submitted!', {
-      description: 'Your timesheet has been sent for approval',
-    });
+  const handleSubmit = async () => {
+    try {
+      // Submit all draft entries for this week
+      const draftEntries = weekData.entries.filter(e => e.status === 'draft');
+      await Promise.all(draftEntries.map(e => submitTimeEntry(e.id)));
+      toast.success('Timesheet submitted!', {
+        description: 'Your timesheet has been sent for approval',
+      });
+      loadWeekData(parseInt(selectedWeek));
+    } catch (err) {
+      toast.error('Failed to submit timesheet', { description: err.message });
+    }
   };
 
-  const handleDelete = (id) => {
-    toast.success('Entry deleted', {
-      description: 'Time entry has been removed',
-    });
+  const handleDelete = async (id) => {
+    try {
+      await deleteTimeEntry(id);
+      toast.success('Entry deleted', {
+        description: 'Time entry has been removed',
+      });
+      loadWeekData(parseInt(selectedWeek));
+    } catch (err) {
+      toast.error('Failed to delete entry', { description: err.message });
+    }
   };
 
   return (
@@ -69,7 +92,7 @@ export function Timesheets() {
           <div className="week-summary-header">
             <div>
               <h3 className="card-title">
-                {format(weekData.weekStart, 'MMM d')} - {format(weekData.weekEnd, 'MMM d, yyyy')}
+                {format(weekStart, 'MMM d')} - {format(weekEnd, 'MMM d, yyyy')}
               </h3>
               <p className="week-info">
                 {weekData.entries.length} entries • {weekData.totalHours} hours
@@ -82,7 +105,11 @@ export function Timesheets() {
           </div>
         </div>
         <div className="card-content">
-          {weekData.entries.length === 0 ? (
+          {loading ? (
+            <div className="empty-state">
+              <p className="empty-message">Loading...</p>
+            </div>
+          ) : weekData.entries.length === 0 ? (
             <div className="empty-state">
               <p className="empty-message">No time entries for this week</p>
               <button className="btn-link">Add Time Entry</button>
@@ -101,7 +128,7 @@ export function Timesheets() {
                 </thead>
                 <tbody>
                   {weekData.entries.map(entry => {
-                    const project = getProjectById(entry.projectId);
+                    const project = entry.project;
                     return (
                       <tr key={entry.id}>
                         <td className="font-medium">
@@ -173,12 +200,12 @@ export function Timesheets() {
           <div className="card-content">
             <div className="daily-grid">
               {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, index) => {
-                const dayDate = new Date(weekData.weekStart);
+                const dayDate = new Date(weekStart);
                 dayDate.setDate(dayDate.getDate() + index);
                 const dayEntries = weekData.entries.filter(
                   e => format(new Date(e.date), 'yyyy-MM-dd') === format(dayDate, 'yyyy-MM-dd')
                 );
-                const dayHours = dayEntries.reduce((sum, e) => sum + e.hours, 0);
+                const dayHours = dayEntries.reduce((sum, e) => sum + parseFloat(e.hours), 0);
 
                 return (
                   <div key={day} className="day-cell">

@@ -1,43 +1,81 @@
+import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { timeEntries, projects } from '../data/mockData';
+import { fetchProjects, fetchTimeEntries } from '../data/api';
 import { format, subWeeks, startOfWeek, endOfWeek } from 'date-fns';
 import './Reports.css';
 
 export function Reports() {
-  // Weekly hours data
-  const weeklyData = [0, 1, 2, 3].map(weeksAgo => {
-    const weekStart = startOfWeek(subWeeks(new Date(), weeksAgo), { weekStartsOn: 1 });
-    const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
-    
-    const weekEntries = timeEntries.filter(entry => {
-      const entryDate = new Date(entry.date);
-      return entryDate >= weekStart && entryDate <= weekEnd;
-    });
+  const [weeklyData, setWeeklyData] = useState([]);
+  const [projectData, setProjectData] = useState([]);
+  const [totalHours, setTotalHours] = useState(0);
+  const [loading, setLoading] = useState(true);
 
-    return {
-      id: `week-${weeksAgo}`,
-      week: format(weekStart, 'MMM d'),
-      hours: weekEntries.reduce((sum, e) => sum + e.hours, 0),
-    };
-  }).reverse();
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const [projects, allEntries] = await Promise.all([
+          fetchProjects(),
+          fetchTimeEntries(),
+        ]);
 
-  // Project distribution
-  const projectData = projects.map((project) => {
-    const projectEntries = timeEntries.filter(e => e.projectId === project.id);
-    const hours = projectEntries.reduce((sum, e) => sum + e.hours, 0);
-    return {
-      id: project.id,
-      name: project.name,
-      hours,
-      color: project.color,
-    };
-  }).filter(p => p.hours > 0);
+        // Weekly hours data
+        const weekly = [0, 1, 2, 3].map(weeksAgo => {
+          const ws = startOfWeek(subWeeks(new Date(), weeksAgo), { weekStartsOn: 1 });
+          const we = endOfWeek(ws, { weekStartsOn: 1 });
 
-  const totalHours = timeEntries.reduce((sum, entry) => sum + entry.hours, 0);
+          const weekEntries = allEntries.filter(entry => {
+            const entryDate = new Date(entry.date);
+            return entryDate >= ws && entryDate <= we;
+          });
+
+          return {
+            id: `week-${weeksAgo}`,
+            week: format(ws, 'MMM d'),
+            hours: weekEntries.reduce((sum, e) => sum + parseFloat(e.hours), 0),
+          };
+        }).reverse();
+
+        // Project distribution
+        const projData = projects.map((project) => {
+          const projectEntries = allEntries.filter(e => e.project?.id === project.id);
+          const hours = projectEntries.reduce((sum, e) => sum + parseFloat(e.hours), 0);
+          return {
+            id: project.id,
+            name: project.name,
+            hours,
+            color: project.color,
+          };
+        }).filter(p => p.hours > 0);
+
+        const total = allEntries.reduce((sum, entry) => sum + parseFloat(entry.hours), 0);
+
+        setWeeklyData(weekly);
+        setProjectData(projData);
+        setTotalHours(total);
+      } catch (err) {
+        console.error('Failed to load report data:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="reports-page">
+        <div className="page-header">
+          <h2 className="page-title">Reports & Analytics</h2>
+          <p className="page-subtitle">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   const avgWeeklyHours = (totalHours / 4).toFixed(1);
-  const mostActiveProject = projectData.reduce((prev, current) => 
-    prev.hours > current.hours ? prev : current
-  , projectData[0]);
+  const mostActiveProject = projectData.length > 0
+    ? projectData.reduce((prev, current) => prev.hours > current.hours ? prev : current, projectData[0])
+    : null;
 
   return (
     <div className="reports-page">
@@ -64,8 +102,8 @@ export function Reports() {
 
         <div className="stat-card">
           <div className="stat-label">Most Active Project</div>
-          <div className="stat-value-lg">{mostActiveProject?.name}</div>
-          <div className="stat-description">{mostActiveProject?.hours}h logged</div>
+          <div className="stat-value-lg">{mostActiveProject?.name ?? 'N/A'}</div>
+          <div className="stat-description">{mostActiveProject?.hours ?? 0}h logged</div>
         </div>
       </div>
 
