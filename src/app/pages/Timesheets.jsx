@@ -46,6 +46,51 @@ export function Timesheets() {
 
   const weekData = getWeekData(parseInt(selectedWeek));
 
+  const handleCreate = () => {
+    const newEntry = {
+      id: Date.now(),
+      date: new Date(),
+      hours: 8,
+      description: 'New work entry',
+      projectId: 1,
+      status: 'draft',
+    };
+  
+    setEntries(prev => [...prev, newEntry]);
+    toast.success('Entry created');
+  };
+  
+  const handleEdit = (id) => {
+    setEntries(prev =>
+      prev.map(entry =>
+        entry.id === id
+          ? { ...entry, description: entry.description + ' (edited)' }
+          : entry
+      )
+    );
+    toast.success('Entry updated');
+  };
+  
+  const handleDelete = (id) => {
+    setEntries(prev => prev.filter(entry => entry.id !== id));
+
+    toast.success('Entry deleted', {
+      description: 'Time entry has been removed',
+    });
+  };
+
+  const handleSubmitEntry = (id) => {
+    setEntries(prev =>
+      prev.map(entry =>
+        entry.id === id
+          ? { ...entry, status: 'submitted' }
+          : entry
+      )
+    );
+
+    toast.success('Entry submitted');
+  };
+
   const handleSubmit = () => {
     if (weekData.hasDraftEntries) {
       toast.error('Submit all entries first', {
@@ -61,12 +106,6 @@ export function Timesheets() {
 
     toast.success('Timesheet submitted!', {
       description: 'Your timesheet has been sent for approval',
-    });
-  };
-
-  const handleDelete = (id) => {
-    toast.success('Entry deleted', {
-      description: 'Time entry has been removed',
     });
   };
 
