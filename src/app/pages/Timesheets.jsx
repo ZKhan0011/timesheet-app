@@ -130,6 +130,14 @@ export function Timesheets() {
         </select>
       </div>
 
+        <button onClick={handleCreate} className="btn btn-secondary">
+          <Plus className="btn-icon" />
+          Add Entry
+        </button>
+      <div>
+      </div>
+  
+
       <div className="card">
         <div className="card-header">
           <div className="week-summary-header">
