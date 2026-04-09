@@ -9,6 +9,10 @@
   margin-bottom: 1.5rem;
 }
 
+.table-wrapper {
+  overflow-x: auto;
+}
+
 .week-select {
   width: 16rem;
   padding: 0.5rem 0.75rem;
@@ -66,6 +70,7 @@
 .entries-table {
   width: 100%;
   border-collapse: collapse;
+  min-width: 720px;
 }
 
 .entries-table thead tr {
@@ -137,6 +142,10 @@
   white-space: nowrap;
 }
 
+.status-cell {
+  white-space: nowrap;
+}
+
 .hours-cell {
   text-align: right;
   font-weight: 600;
@@ -178,6 +187,36 @@
 .action-icon {
   width: 1rem;
   height: 1rem;
+}
+
+.mobile-entry-list {
+  display: none;
+}
+
+.mobile-entry-card {
+  padding: 1rem;
+  border: 1px solid #374151;
+  border-radius: 0.5rem;
+  background-color: #000;
+}
+
+.mobile-entry-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.mobile-entry-description {
+  color: #d1d5db;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.mobile-actions {
+  justify-content: flex-start;
+  margin-top: 0.75rem;
 }
 
 .timesheet-footer {
@@ -245,4 +284,37 @@
   font-size: 0.75rem;
   color: #9ca3af;
   margin: 0;
+}
+
+@media (max-width: 900px) {
+  .timesheets-header,
+  .week-summary-header,
+  .timesheet-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .week-select {
+    width: 100%;
+  }
+
+  .entries-table {
+    display: none;
+  }
+
+  .mobile-entry-list {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .daily-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 520px) {
+  .daily-grid {
+    grid-template-columns: 1fr;
+  }
 }

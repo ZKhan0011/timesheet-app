@@ -5,8 +5,76 @@ import { fetchProjects, createTimeEntry } from '../data/api';
 import { toast } from 'sonner';
 import './TimeEntry.css';
 
+function DayCalendar({ selectedDay, onDaySelect }) {
+  const [viewMonth, setViewMonth] = useState(selectedDay || new Date());
+
+  const monthStart = startOfMonth(viewMonth);
+  const monthEnd = endOfMonth(viewMonth);
+  const gridStart = startOfWeek(monthStart, { weekStartsOn: 1 });
+  const gridEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
+  const days = eachDayOfInterval({ start: gridStart, end: gridEnd });
+
+  return (
+    <div className="week-calendar">
+      <div className="calendar-header">
+        <button
+          type="button"
+          className="cal-nav-btn"
+          onClick={() => setViewMonth(subMonths(viewMonth, 1))}
+        >
+          <ChevronLeft size={16} />
+        </button>
+        <span className="calendar-month-label">
+          {format(viewMonth, 'MMMM yyyy')}
+        </span>
+        <button
+          type="button"
+          className="cal-nav-btn"
+          onClick={() => setViewMonth(addMonths(viewMonth, 1))}
+        >
+          <ChevronRight size={16} />
+        </button>
+      </div>
+
+      <div className="calendar-grid">
+        {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d) => (
+          <div key={d} className="calendar-dow">{d}</div>
+        ))}
+
+        {days.map((day) => {
+          const isSelected = selectedDay && isSameDay(day, selectedDay);
+          const isToday = isSameDay(day, new Date());
+          const faded = !isSameMonth(day, viewMonth);
+
+          return (
+            <button
+              key={day.toISOString()}
+              type="button"
+              onClick={() => onDaySelect(day)}
+              className={[
+                'calendar-day',
+                isSelected ? 'selected-day' : '', 
+                isToday ? 'today' : '',
+                faded ? 'faded' : '',
+              ].filter(Boolean).join(' ')}
+            >
+              {format(day, 'd')}
+            </button>
+          );
+        })}
+      </div>
+
+      {selectedDay && (
+        <div className="selected-week-label">
+          Selected Date: {format(selectedDay, 'MMMM do, yyyy')}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function TimeEntry() {
-  const [date, setDate] = useState(new Date());
+  const [selectedDay, setSelectedDay] = useState(new Date());
   const [projectId, setProjectId] = useState('');
   const [hours, setHours] = useState('');
   const [description, setDescription] = useState('');
@@ -21,7 +89,6 @@ export function TimeEntry() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     if (!projectId || !hours || !description) {
       toast.error('Please fill in all fields');
       return;
@@ -54,18 +121,14 @@ export function TimeEntry() {
   };
 
   const handleSaveDraft = () => {
-    toast.success('Draft saved', {
-      description: 'You can continue editing later',
-    });
+    toast.success('Draft saved', { description: 'You can continue editing later' });
   };
 
   return (
     <div className="time-entry-page">
       <div className="page-header">
         <h2 className="page-title">Log Time</h2>
-        <p className="page-subtitle">
-          Enter your time for the selected date
-        </p>
+        <p className="page-subtitle">Select a date and log your hours</p>
       </div>
 
       <div className="card">
@@ -74,14 +137,12 @@ export function TimeEntry() {
         </div>
         <div className="card-content">
           <form onSubmit={handleSubmit} className="time-entry-form">
+
             <div className="form-group">
-              <label htmlFor="date" className="form-label">Date</label>
-              <input
-                type="date"
-                id="date"
-                className="form-input"
-                value={format(date, 'yyyy-MM-dd')}
-                onChange={(e) => setDate(new Date(e.target.value))}
+              <label className="form-label">Date</label>
+              <DayCalendar
+                selectedDay={selectedDay}
+                onDaySelect={setSelectedDay}
               />
             </div>
 
@@ -109,7 +170,7 @@ export function TimeEntry() {
                 type="number"
                 step="0.5"
                 min="0"
-                max="24"
+                max="24" 
                 placeholder="8.0"
                 className="form-input"
                 value={hours}
@@ -140,32 +201,6 @@ export function TimeEntry() {
               </button>
             </div>
           </form>
-        </div>
-      </div>
-
-      <div className="card tips-card">
-        <div className="card-header">
-          <h3 className="card-title">Tips for Time Entry</h3>
-        </div>
-        <div className="card-content">
-          <ul className="tips-list">
-            <li className="tip-item">
-              <span className="tip-bullet">•</span>
-              <span>Log your time daily for accurate tracking</span>
-            </li>
-            <li className="tip-item">
-              <span className="tip-bullet">•</span>
-              <span>Be specific in your descriptions for better reporting</span>
-            </li>
-            <li className="tip-item">
-              <span className="tip-bullet">•</span>
-              <span>Round to the nearest 0.5 hours</span>
-            </li>
-            <li className="tip-item">
-              <span className="tip-bullet">•</span>
-              <span>Submit your timesheet by end of week for timely approval</span>
-            </li>
-          </ul>
         </div>
       </div>
     </div>

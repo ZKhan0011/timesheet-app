@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { CheckCircle, Send, Edit, Trash2 } from 'lucide-react';
 import { fetchTimeEntries, deleteTimeEntry, submitTimeEntry } from '../data/api';
 import { format, startOfWeek, endOfWeek, subWeeks } from 'date-fns';
+import { Link } from 'react-router';
 import { toast } from 'sonner';
 import './Timesheets.css';
 
@@ -66,6 +67,36 @@ export function Timesheets() {
     }
   };
 
+  const handleSubmitEntry = (id) => {
+    setEntries(prev =>
+      prev.map(entry =>
+        entry.id === id
+          ? { ...entry, status: 'submitted' }
+          : entry
+      )
+    );
+
+    toast.success('Entry submitted');
+  };
+
+  const handleSubmit = () => {
+    if (weekData.hasDraftEntries) {
+      toast.error('Submit all entries first', {
+        description: 'Please submit all of your time entries before submitting the timesheet.',
+      });
+      return;
+    }
+
+    setSubmittedTimesheets((currentSubmittedTimesheets) => ({
+      ...currentSubmittedTimesheets,
+      [selectedWeek]: true,
+    }));
+
+    toast.success('Timesheet submitted!', {
+      description: 'Your timesheet has been sent for approval',
+    });
+  };
+
   return (
     <div className="timesheets-page">
       <div className="timesheets-header">
@@ -87,6 +118,14 @@ export function Timesheets() {
         </select>
       </div>
 
+        <button onClick={handleCreate} className="btn btn-secondary">
+          <Plus className="btn-icon" />
+          Add Entry
+        </button>
+      <div>
+      </div>
+  
+
       <div className="card">
         <div className="card-header">
           <div className="week-summary-header">
@@ -98,10 +137,18 @@ export function Timesheets() {
                 {weekData.entries.length} entries • {weekData.totalHours} hours
               </p>
             </div>
-            <span className={`status-badge status-${weekData.status}`}>
-              {weekData.status === 'approved' && <CheckCircle className="badge-icon" />}
-              {weekData.status.charAt(0).toUpperCase() + weekData.status.slice(1)}
-            </span>
+            {weekData.entries.length > 0 && (
+              <span className={`status-badge ${
+                weekData.timesheetStatus === 'Approved'
+                  ? 'status-approved'
+                  : weekData.timesheetStatus === 'Pending Approval'
+                    ? 'status-submitted'
+                    : 'status-draft'
+              }`}>
+                {weekData.timesheetStatus === 'Approved' && <CheckCircle className="badge-icon" />}
+                {weekData.timesheetStatus}
+              </span>
+            )}
           </div>
         </div>
         <div className="card-content">
@@ -112,7 +159,7 @@ export function Timesheets() {
           ) : weekData.entries.length === 0 ? (
             <div className="empty-state">
               <p className="empty-message">No time entries for this week</p>
-              <button className="btn-link">Add Time Entry</button>
+              <Link to="/time-entry" className="btn-link">Add Time Entry</Link>
             </div>
           ) : (
             <div>
@@ -165,15 +212,91 @@ export function Timesheets() {
                                 <Trash2 className="action-icon" />
                               </button>
                             </div>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                          </td>
+                          <td className="description-cell">
+                            {entry.description}
+                          </td>
+                          <td className="status-cell">
+                            <span className={`status-badge status-${timesheetEntryStatus}`}>
+                              {timesheetEntryStatus}
+                            </span>
+                          </td>
+                          <td className="hours-cell">
+                            {entry.hours}h
+                          </td>
+                          <td className="actions-cell">
+                            {timesheetEntryStatus === 'draft' && (
+                              <div className="action-buttons">
+                                <button className="action-btn edit-btn">
+                                  <Edit className="action-icon" />
+                                </button>
+                                <button
+                                  className="action-btn delete-btn"
+                                  onClick={() => handleDelete(entry.id)}
+                                >
+                                  <Trash2/>
+                                </button>
 
-              {weekData.status === 'draft' && weekData.entries.length > 0 && (
+                                <button
+                                  className="action-btn edit-btn"
+                                  onClick={() => handleEdit(entry.id)}
+                                >
+                                  <Edit />
+                                </button>
+
+                                <button
+                                  className="action-btn submit-btn"
+                                  onClick={() => handleSubmitEntry(entry.id)}
+                                >
+                                  <Send />
+                                </button> 
+
+                                  </div>
+                                )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="mobile-entry-list">
+                {weekData.entries.map(entry => {
+                  const project = getProjectById(entry.projectId);
+                  const timesheetEntryStatus = entry.status;
+
+                  return (
+                    <div key={`${entry.id}-mobile`} className="mobile-entry-card">
+                      <div className="mobile-entry-header">
+                        <div>
+                          <p className="project-name">{project?.name}</p>
+                          <p className="project-client">{format(new Date(entry.date), 'EEE, MMM d')} • {entry.hours}h</p>
+                        </div>
+                        <span className={`status-badge status-${timesheetEntryStatus}`}>
+                          {timesheetEntryStatus}
+                        </span>
+                      </div>
+                      <p className="mobile-entry-description">{entry.description}</p>
+                      {timesheetEntryStatus === 'draft' && (
+                        <div className="action-buttons mobile-actions">
+                          <button className="action-btn edit-btn">
+                            <Edit className="action-icon" />
+                          </button>
+                          <button
+                            className="action-btn delete-btn"
+                            onClick={() => handleDelete(entry.id)}
+                          >
+                            <Trash2 className="action-icon" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {weekData.entries.length > 0 && weekData.timesheetStatus === 'Not Submitted' && (
                 <div className="timesheet-footer">
                   <div>
                     <p className="total-hours">Total Hours: {weekData.totalHours}h</p>
