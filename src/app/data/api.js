@@ -57,7 +57,7 @@ export async function createTimeEntry(data) {
 
 export async function updateTimeEntry(id, data) {
   return request(`/time-entries/${id}/`, {
-    method: 'PUT',
+    method: 'PATCH',
     body: JSON.stringify(data),
   });
 }
