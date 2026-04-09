@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { CheckCircle, Send, Edit, Trash2 } from 'lucide-react';
-import { timeEntries, getProjectById } from '../data/mockData';
+import { CheckCircle, Send, Edit, Trash2, Plus } from 'lucide-react'; 
+import { timeEntries as initialEntries, getProjectById } from '../data/mockData';
 import { format, startOfWeek, endOfWeek, subWeeks } from 'date-fns';
 import { Link } from 'react-router';
 import { toast } from 'sonner';
