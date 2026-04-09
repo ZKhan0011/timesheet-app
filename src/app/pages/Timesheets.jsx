@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { CheckCircle, Send, Edit, Trash2 } from 'lucide-react';
-import { timeEntries, getProjectById } from '../data/mockData';
+import { CheckCircle, Send, Edit, Trash2, Plus } from 'lucide-react'; 
+import { timeEntries as initialEntries, getProjectById } from '../data/mockData';
 import { format, startOfWeek, endOfWeek, subWeeks } from 'date-fns';
 import { Link } from 'react-router';
 import { toast } from 'sonner';
@@ -10,12 +10,14 @@ export function Timesheets() {
   const [selectedWeek, setSelectedWeek] = useState('0');
   const [submittedTimesheets, setSubmittedTimesheets] = useState({});
 
+  const [entries, setEntries] = useState(initialEntries);
+
   const getWeekData = (weeksAgo) => {
     const weekStart = startOfWeek(subWeeks(new Date(), weeksAgo), { weekStartsOn: 1 });
     const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
     const hasSubmittedTimesheet = submittedTimesheets[weeksAgo] === true;
     
-    const entries = timeEntries.filter(entry => {
+    const filteredEntries = entries.filter(entry => {
       const entryDate = new Date(entry.date);
       return entryDate >= weekStart && entryDate <= weekEnd;
     });
@@ -44,6 +46,51 @@ export function Timesheets() {
 
   const weekData = getWeekData(parseInt(selectedWeek));
 
+  const handleCreate = () => {
+    const newEntry = {
+      id: Date.now(),
+      date: new Date(),
+      hours: 8,
+      description: 'New work entry',
+      projectId: 1,
+      status: 'draft',
+    };
+  
+    setEntries(prev => [...prev, newEntry]);
+    toast.success('Entry created');
+  };
+  
+  const handleEdit = (id) => {
+    setEntries(prev =>
+      prev.map(entry =>
+        entry.id === id
+          ? { ...entry, description: entry.description + ' (edited)' }
+          : entry
+      )
+    );
+    toast.success('Entry updated');
+  };
+  
+  const handleDelete = (id) => {
+    setEntries(prev => prev.filter(entry => entry.id !== id));
+
+    toast.success('Entry deleted', {
+      description: 'Time entry has been removed',
+    });
+  };
+
+  const handleSubmitEntry = (id) => {
+    setEntries(prev =>
+      prev.map(entry =>
+        entry.id === id
+          ? { ...entry, status: 'submitted' }
+          : entry
+      )
+    );
+
+    toast.success('Entry submitted');
+  };
+
   const handleSubmit = () => {
     if (weekData.hasDraftEntries) {
       toast.error('Submit all entries first', {
@@ -59,12 +106,6 @@ export function Timesheets() {
 
     toast.success('Timesheet submitted!', {
       description: 'Your timesheet has been sent for approval',
-    });
-  };
-
-  const handleDelete = (id) => {
-    toast.success('Entry deleted', {
-      description: 'Time entry has been removed',
     });
   };
 
@@ -88,6 +129,14 @@ export function Timesheets() {
           <option value="3">3 Weeks Ago</option>
         </select>
       </div>
+
+        <button onClick={handleCreate} className="btn btn-secondary">
+          <Plus className="btn-icon" />
+          Add Entry
+        </button>
+      <div>
+      </div>
+  
 
       <div className="card">
         <div className="card-header">
@@ -177,10 +226,25 @@ export function Timesheets() {
                                   className="action-btn delete-btn"
                                   onClick={() => handleDelete(entry.id)}
                                 >
-                                  <Trash2 className="action-icon" />
+                                  <Trash2/>
                                 </button>
-                              </div>
-                            )}
+
+                                <button
+                                  className="action-btn edit-btn"
+                                  onClick={() => handleEdit(entry.id)}
+                                >
+                                  <Edit />
+                                </button>
+
+                                <button
+                                  className="action-btn submit-btn"
+                                  onClick={() => handleSubmitEntry(entry.id)}
+                                >
+                                  <Send />
+                                </button> 
+
+                                  </div>
+                                )}
                           </td>
                         </tr>
                       );
