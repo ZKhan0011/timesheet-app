@@ -57,9 +57,9 @@ export function Timesheets() {
 
   const handleSubmit = async () => {
     try {
-      // Submit all draft entries for this week
-      const draftEntries = weekData.entries.filter(e => e.status === 'draft');
-      await Promise.all(draftEntries.map(e => submitTimeEntry(e.id)));
+      // Submit all draft and rejected entries for this week
+      const entriesToSubmit = weekData.entries.filter(e => e.status === 'draft' || e.status === 'rejected');
+      await Promise.all(entriesToSubmit.map(e => submitTimeEntry(e.id)));
       toast.success('Timesheet submitted!', {
         description: 'Your timesheet has been sent for approval',
       });
