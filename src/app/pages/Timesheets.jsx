@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { CheckCircle, Send, Edit, Trash2, X } from 'lucide-react';
-import { fetchTimeEntries, deleteTimeEntry, submitTimeEntry, updateTimeEntry } from '../data/api';
+import { fetchTimeEntries, deleteTimeEntry, submitTimeEntry, updateTimeEntry, approveTimeEntry } from '../data/api';
 import { format, startOfWeek, endOfWeek, subWeeks } from 'date-fns';
 import { Link } from 'react-router';
 import { toast } from 'sonner';
@@ -13,6 +13,8 @@ export function Timesheets() {
   const [weekStart, setWeekStart] = useState(new Date());
   const [weekEnd, setWeekEnd] = useState(new Date());
   const [editingEntry, setEditingEntry] = useState(null);
+  
+  const user = JSON.parse(localStorage.getItem('user')) || {};
 
   const loadWeekData = async (weeksAgo) => {
     setLoading(true);
@@ -28,7 +30,16 @@ export function Timesheets() {
       });
 
       const totalHours = entries.reduce((sum, entry) => sum + parseFloat(entry.hours), 0);
-      const status = entries.length > 0 ? entries[0].status : 'draft';
+      let status = 'draft';
+      if (entries.length > 0) {
+        if (entries.some(e => e.status === 'draft')) {
+          status = 'draft';
+        } else if (entries.some(e => e.status === 'submitted')) {
+          status = 'submitted';
+        } else {
+          status = 'approved';
+        }
+      }
 
       setWeekData({ entries, totalHours, status });
     } catch (err) {
@@ -53,6 +64,19 @@ export function Timesheets() {
       loadWeekData(parseInt(selectedWeek));
     } catch (err) {
       toast.error('Failed to submit timesheet', { description: err.message });
+    }
+  };
+
+  const handleApprove = async () => {
+    try {
+      const submittedEntries = weekData.entries.filter(e => e.status === 'submitted');
+      await Promise.all(submittedEntries.map(e => approveTimeEntry(e.id)));
+      toast.success('Timesheet approved!', {
+        description: 'Timesheet has been approved',
+      });
+      loadWeekData(parseInt(selectedWeek));
+    } catch (err) {
+      toast.error('Failed to approve timesheet', { description: err.message });
     }
   };
 
@@ -259,6 +283,21 @@ export function Timesheets() {
                   <button onClick={handleSubmit} className="btn btn-primary">
                     <Send className="btn-icon" />
                     Submit Timesheet
+                  </button>
+                </div>
+              )}
+
+              {weekData.entries.length > 0 && weekData.status === 'submitted' && user.role === 'Manager' && (
+                <div className="timesheet-footer">
+                  <div>
+                    <p className="total-hours">Total Hours: {weekData.totalHours}h</p>
+                    <p className="remaining-hours">
+                      Ready for review
+                    </p>
+                  </div>
+                  <button onClick={handleApprove} className="btn btn-primary" style={{ backgroundColor: '#22c55e', borderColor: '#22c55e' }}>
+                    <CheckCircle className="btn-icon" />
+                    Approve Timesheet
                   </button>
                 </div>
               )}
