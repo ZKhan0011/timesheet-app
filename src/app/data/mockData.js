@@ -92,6 +92,7 @@ export const loginData = [
   { username: 'consultant', password: 'password', role: 'Consultant',  name: 'Consultant' },
   { username: 'admin',      password: 'password', role: 'Admin',       name: 'Admin'   },
   { username: 'payroll',    password: 'password', role: 'Payroll',     name: 'Payroll'      },
+  { username: 'manager',    password: 'password', role: 'Manager',     name: 'Manager'      },
 ];
 export const getUserByCredentials = (username, password) =>
   loginData.find(u => u.username === username && u.password === password);
