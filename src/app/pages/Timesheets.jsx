@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { CheckCircle, Send, Edit, Trash2, X } from 'lucide-react';
-import { fetchTimeEntries, deleteTimeEntry, submitTimeEntry, updateTimeEntry, approveTimeEntry, rejectTimeEntry } from '../data/api';
+import { fetchTimeEntries, deleteTimeEntry, submitTimeEntry, updateTimeEntry, approveTimeEntry, rejectTimeEntry, hourlyRate, approvePayroll } from '../data/api';
 import { format, startOfWeek, endOfWeek, subWeeks } from 'date-fns';
 import { Link } from 'react-router';
 import { toast } from 'sonner';
@@ -38,8 +38,10 @@ export function Timesheets() {
           status = 'draft';
         } else if (entries.some(e => e.status === 'submitted')) {
           status = 'submitted';
-        } else {
+        } else if (entries.some(e => e.status === 'approved')) {
           status = 'approved';
+        } else if (entries.every(e => e.status === 'payroll_approved')) {
+          status = 'payroll_approved';
         }
       }
 
@@ -126,8 +128,33 @@ export function Timesheets() {
     }
   };
 
-
-
+  const handlePayrollApproval = async () => {
+    try {
+      const approvedEntries = weekData.entries.filter(e => 
+        e.status.toLowerCase() === 'approved'
+      );
+      
+      if (approvedEntries.length === 0) {
+        toast.error('No approved entries found', {
+          description: 'Entries must be approved by a Manager before payroll can be processed.'
+        });
+        return;
+      }
+  
+      await Promise.all(approvedEntries.map(e => approvePayroll(e.id)));
+      
+      const rate = hourlyRate || user.hourlyRate || 0;
+      const totalPay = (weekData.totalHours * rate).toFixed(2);
+  
+      toast.success('Payroll approved successfully!', {
+        description: `Total Hours: ${weekData.totalHours} • Estimated Pay: £${totalPay}`,
+      });
+  
+      loadWeekData(parseInt(selectedWeek));
+    } catch (err) {
+      toast.error('Failed to approve payroll', { description: err.message });
+    }
+  };
   return (
     <div className="timesheets-page">
       <div className="timesheets-header">
@@ -165,16 +192,19 @@ export function Timesheets() {
             </div>
             {weekData.entries.length > 0 && (
               <span className={`status-badge ${
-                weekData.status === 'approved'
-                  ? 'status-approved'
-                  : weekData.status === 'submitted'
-                    ? 'status-submitted'
-                    : weekData.status === 'rejected'
-                      ? 'status-rejected'
-                      : 'status-draft'
+                weekData.status === 'payroll_approved'
+                  ? 'status-payroll-approved'
+                  : weekData.status === 'approved'
+                    ? 'status-approved'
+                    : weekData.status === 'submitted'
+                      ? 'status-submitted'
+                      : weekData.status === 'rejected'
+                        ? 'status-rejected'
+                        : 'status-draft'
               }`}>
                 {weekData.status === 'approved' && <CheckCircle className="badge-icon" />}
-                {weekData.status}
+                {weekData.status === 'payroll_approved' && <CheckCircle className="badge-icon" />}
+                {weekData.status === 'payroll_approved' ? 'Payroll Approved' : weekData.status}
               </span>
             )}
           </div>
@@ -356,12 +386,25 @@ export function Timesheets() {
                   </div>
                 );
               })}
+              </div>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Edit Entry Modal */}
+            </div>
+          )}
+          {weekData.entries.length > 0 && user.role === 'Payroll' && (
+            <div className="timesheet-footer payroll-section">
+            <div>
+              <p className="total-hours">Total Hours: {weekData.totalHours}h</p>
+              <p className="payroll-info">
+              Estimated Pay: £{(weekData.totalHours * hourlyRate).toFixed(2)}
+              </p>
+            </div>
+            <button onClick={handlePayrollApproval} className="btn btn-success">
+              <CheckCircle className="btn-icon" />
+              Approve Payroll
+            </button>
+            </div>
+          )}
+          {/* Edit Entry Modal */}
       {editingEntry && (
         <div className="modal-overlay" onClick={() => setEditingEntry(null)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>

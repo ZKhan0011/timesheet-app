@@ -318,3 +318,7 @@
     grid-template-columns: 1fr;
   }
 }
+.status-payroll-approved {
+  background-color: #7c3aed;
+  color: #ffffff;
+}
