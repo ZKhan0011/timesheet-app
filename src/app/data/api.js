@@ -74,6 +74,18 @@ export async function submitTimeEntry(id) {
   });
 }
 
+export async function approveTimeEntry(id) {
+  return request(`/time-entries/${id}/approve/`, {
+    method: 'POST',
+  });
+}
+
+export async function rejectTimeEntry(id) {
+  return request(`/time-entries/${id}/reject/`, {
+    method: 'POST',
+  });
+}
+
 // ─── Dashboard ───────────────────────────────────────────
 
 export async function fetchDashboardSummary() {
