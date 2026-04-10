@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Clock, CheckCircle, AlertCircle, TrendingUp } from 'lucide-react';
-import { fetchProjects, fetchTimeEntries, fetchDashboardSummary } from '../data/api';
+import { Clock, CheckCircle, AlertCircle, TrendingUp, Edit, X } from 'lucide-react';
+import { fetchProjects, fetchTimeEntries, fetchDashboardSummary, updateTimeEntry } from '../data/api';
 import { format } from 'date-fns';
 import { Link } from 'react-router';
+import { toast } from 'sonner';
 import './Dashboard.css';
 
 export function Dashboard() {
@@ -11,28 +12,48 @@ export function Dashboard() {
   const [projects, setProjects] = useState([]);
   const [allEntries, setAllEntries] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [editingEntry, setEditingEntry] = useState(null);
+
+  const loadData = async () => {
+    try {
+      const [summaryData, projectsData, entriesData] = await Promise.all([
+        fetchDashboardSummary(),
+        fetchProjects(),
+        fetchTimeEntries(),
+      ]);
+      setSummary(summaryData);
+      setProjects(projectsData);
+      setAllEntries(entriesData);
+      setRecentEntries(entriesData.slice(0, 5));
+    } catch (err) {
+      console.error('Failed to load dashboard data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    async function loadData() {
-      try {
-        const [summaryData, projectsData, entriesData] = await Promise.all([
-          fetchDashboardSummary(),
-          fetchProjects(),
-          fetchTimeEntries(),
-        ]);
-        setSummary(summaryData);
-        setProjects(projectsData);
-        setAllEntries(entriesData);
-        // Entries come sorted by -date from the API, take first 5
-        setRecentEntries(entriesData.slice(0, 5));
-      } catch (err) {
-        console.error('Failed to load dashboard data:', err);
-      } finally {
-        setLoading(false);
-      }
-    }
     loadData();
   }, []);
+
+  const handleEditClick = (entry) => {
+    setEditingEntry({ ...entry });
+  };
+
+  const handleUpdateEntry = async (e) => {
+    e.preventDefault();
+    try {
+      await updateTimeEntry(editingEntry.id, {
+        hours: editingEntry.hours,
+        description: editingEntry.description,
+      });
+      toast.success('Entry updated');
+      setEditingEntry(null);
+      loadData();
+    } catch (err) {
+      toast.error('Failed to update entry', { description: err.message });
+    }
+  };
 
   if (loading) {
     return (
@@ -135,10 +156,24 @@ export function Dashboard() {
                       </p>
                     </div>
                     <div className="entry-info">
-                      <p className="entry-hours">{entry.hours}h</p>
-                      <span className={`status-badge status-${entry.status}`}>
-                        {entry.status}
-                      </span>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <p className="entry-hours" style={{ margin: 0 }}>{entry.hours}h</p>
+                          <span className={`status-badge status-${entry.status}`}>
+                            {entry.status}
+                          </span>
+                        </div>
+                        {(entry.status === 'draft' || entry.status === 'rejected') && (
+                          <button 
+                            className="btn btn-outline" 
+                            style={{ padding: '4px 8px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                            onClick={() => handleEditClick(entry)}
+                          >
+                            <Edit size={14} />
+                            Edit
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );
@@ -195,6 +230,52 @@ export function Dashboard() {
           </div>
         </div>
       </div>
+
+      {editingEntry && (
+        <div className="modal-overlay" onClick={() => setEditingEntry(null)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Edit Entry</h3>
+              <button className="close-btn" onClick={() => setEditingEntry(null)}>
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleUpdateEntry} className="modal-form">
+              <div className="form-group">
+                <label>Hours</label>
+                <input
+                  type="number"
+                  step="0.5"
+                  min="0"
+                  max="24"
+                  className="form-input"
+                  value={editingEntry.hours}
+                  onChange={e => setEditingEntry({...editingEntry, hours: e.target.value})}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Description</label>
+                <textarea
+                  className="form-textarea"
+                  rows="3"
+                  value={editingEntry.description}
+                  onChange={e => setEditingEntry({...editingEntry, description: e.target.value})}
+                  required
+                />
+              </div>
+              <div className="modal-actions">
+                <button type="button" className="btn btn-outline" onClick={() => setEditingEntry(null)}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary">
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
