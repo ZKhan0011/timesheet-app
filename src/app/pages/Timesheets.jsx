@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { CheckCircle, Send, Edit, Trash2, X } from 'lucide-react';
-import { fetchTimeEntries, deleteTimeEntry, submitTimeEntry, updateTimeEntry, approveTimeEntry } from '../data/api';
+import { fetchTimeEntries, deleteTimeEntry, submitTimeEntry, updateTimeEntry, approveTimeEntry, rejectTimeEntry } from '../data/api';
 import { format, startOfWeek, endOfWeek, subWeeks } from 'date-fns';
 import { Link } from 'react-router';
 import { toast } from 'sonner';
@@ -32,7 +32,9 @@ export function Timesheets() {
       const totalHours = entries.reduce((sum, entry) => sum + parseFloat(entry.hours), 0);
       let status = 'draft';
       if (entries.length > 0) {
-        if (entries.some(e => e.status === 'draft')) {
+        if (entries.some(e => e.status === 'rejected')) {
+          status = 'rejected';
+        } else if (entries.some(e => e.status === 'draft')) {
           status = 'draft';
         } else if (entries.some(e => e.status === 'submitted')) {
           status = 'submitted';
@@ -77,6 +79,19 @@ export function Timesheets() {
       loadWeekData(parseInt(selectedWeek));
     } catch (err) {
       toast.error('Failed to approve timesheet', { description: err.message });
+    }
+  };
+
+  const handleReject = async () => {
+    try {
+      const submittedEntries = weekData.entries.filter(e => e.status === 'submitted');
+      await Promise.all(submittedEntries.map(e => rejectTimeEntry(e.id)));
+      toast.success('Timesheet rejected', {
+        description: 'Timesheet returned to consultant for review',
+      });
+      loadWeekData(parseInt(selectedWeek));
+    } catch (err) {
+      toast.error('Failed to reject timesheet', { description: err.message });
     }
   };
 
@@ -154,7 +169,9 @@ export function Timesheets() {
                   ? 'status-approved'
                   : weekData.status === 'submitted'
                     ? 'status-submitted'
-                    : 'status-draft'
+                    : weekData.status === 'rejected'
+                      ? 'status-rejected'
+                      : 'status-draft'
               }`}>
                 {weekData.status === 'approved' && <CheckCircle className="badge-icon" />}
                 {weekData.status}
@@ -211,7 +228,7 @@ export function Timesheets() {
                           {entry.hours}h
                         </td>
                         <td className="actions-cell">
-                          {entry.status === 'draft' && (
+                          {(entry.status === 'draft' || entry.status === 'rejected') && (
                             <div className="action-buttons">
                               <button 
                                 className="action-btn edit-btn"
@@ -251,7 +268,7 @@ export function Timesheets() {
                         </span>
                       </div>
                       <p className="mobile-entry-description">{entry.description}</p>
-                      {timesheetEntryStatus === 'draft' && (
+                      {(timesheetEntryStatus === 'draft' || timesheetEntryStatus === 'rejected') && (
                         <div className="action-buttons mobile-actions">
                           <button 
                             className="action-btn edit-btn"
@@ -272,7 +289,7 @@ export function Timesheets() {
                 })}
               </div>
 
-              {weekData.entries.length > 0 && weekData.status === 'draft' && (
+              {(weekData.status === 'draft' || weekData.status === 'rejected') && weekData.entries.length > 0 && (
                 <div className="timesheet-footer">
                   <div>
                     <p className="total-hours">Total Hours: {weekData.totalHours}h</p>
@@ -282,7 +299,7 @@ export function Timesheets() {
                   </div>
                   <button onClick={handleSubmit} className="btn btn-primary">
                     <Send className="btn-icon" />
-                    Submit Timesheet
+                    Submit/Resubmit Timesheet
                   </button>
                 </div>
               )}
@@ -295,10 +312,16 @@ export function Timesheets() {
                       Ready for review
                     </p>
                   </div>
-                  <button onClick={handleApprove} className="btn btn-primary" style={{ backgroundColor: '#22c55e', borderColor: '#22c55e' }}>
-                    <CheckCircle className="btn-icon" />
-                    Approve Timesheet
-                  </button>
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    <button onClick={handleReject} className="btn btn-outline" style={{ borderColor: '#ef4444', color: '#ef4444' }}>
+                      <X className="btn-icon" />
+                      Reject
+                    </button>
+                    <button onClick={handleApprove} className="btn btn-primary" style={{ backgroundColor: '#22c55e', borderColor: '#22c55e' }}>
+                      <CheckCircle className="btn-icon" />
+                      Approve
+                    </button>
+                  </div>
                 </div>
               )}
             </div>

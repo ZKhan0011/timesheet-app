@@ -80,6 +80,12 @@ export async function approveTimeEntry(id) {
   });
 }
 
+export async function rejectTimeEntry(id) {
+  return request(`/time-entries/${id}/reject/`, {
+    method: 'POST',
+  });
+}
+
 // ─── Dashboard ───────────────────────────────────────────
 
 export async function fetchDashboardSummary() {

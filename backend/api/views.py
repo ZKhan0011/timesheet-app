@@ -49,6 +49,15 @@ class TimeEntryViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(entry)
         return Response(serializer.data)
 
+    @action(detail=True, methods=['post'])
+    def reject(self, request, pk=None):
+        """Change a time entry status to 'rejected'."""
+        entry = self.get_object()
+        entry.status = 'rejected'
+        entry.save()
+        serializer = self.get_serializer(entry)
+        return Response(serializer.data)
+
 
 @api_view(['GET'])
 def dashboard_summary(request):
