@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { fetchProjects, fetchTimeEntries, hourlyRate } from '../data/api';
 import { format, subWeeks, startOfWeek, endOfWeek } from 'date-fns';
-import { Wallet } from 'lucide-react'; 
 import './Reports.css';
 
 export function Reports() {
