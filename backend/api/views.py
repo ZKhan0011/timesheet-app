@@ -57,6 +57,12 @@ class TimeEntryViewSet(viewsets.ModelViewSet):
         entry.save()
         serializer = self.get_serializer(entry)
         return Response(serializer.data)
+    @action(detail=True, methods=['post'], url_path='approve-payroll')
+    def approve_payroll(self, request, pk=None):
+        entry = self.get_object()
+        entry.status = 'payroll_approved'
+        entry.save()
+        return Response({'status': 'payroll approved'})
 
 
 @api_view(['GET'])

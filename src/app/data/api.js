@@ -91,3 +91,14 @@ export async function rejectTimeEntry(id) {
 export async function fetchDashboardSummary() {
   return request('/dashboard/summary/');
 }
+export const hourlyRate = 50;
+export const approvePayroll = async (id) => {
+  const res = await fetch(`/api/time-entries/${id}/approve-payroll/`, { 
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+};
