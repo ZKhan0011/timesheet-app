@@ -128,25 +128,26 @@ export function Timesheets() {
     }
   };
 
-  const handlePayrollApproval = async () => {
+  const handlePayrollApproval = async (e) => {
+    e.preventDefault();
     try {
-      const approvedEntries = weekData.entries.filter(e => 
-        e.status.toLowerCase() === 'approved'
+      const approvedEntries = weekData.entries.filter(
+        (entry) => entry.status.toLowerCase() === 'approved'
       );
-      
+ 
       if (approvedEntries.length === 0) {
         toast.error('No approved entries found', {
-          description: 'Entries must be approved by a Manager before payroll can be processed.'
+          description: 'Entries must be approved by a Manager before payroll can be processed.',
         });
         return;
       }
-  
-      await Promise.all(approvedEntries.map(e => approvePayroll(e.id)));
-      
+ 
+      await Promise.all(approvedEntries.map((entry) => approvePayroll(entry.id)));
+ 
       const rate = hourlyRate || user.hourlyRate || 0;
       const totalPay = (weekData.totalHours * rate).toFixed(2);
-  
-      toast.success('Payroll approved successfully!', {
+ 
+      toast.success('Payroll approved!', {
         description: `Total Hours: ${weekData.totalHours} • Estimated Pay: £${totalPay}`,
       });
   
@@ -155,6 +156,7 @@ export function Timesheets() {
       toast.error('Failed to approve payroll', { description: err.message });
     }
   };
+ 
   return (
     <div className="timesheets-page">
       <div className="timesheets-header">
@@ -385,26 +387,30 @@ export function Timesheets() {
                     </div>
                   </div>
                 );
-              })}
+                })}
+              </div>
               </div>
             </div>
-            </div>
-          )}
-          {weekData.entries.length > 0 && user.role === 'Payroll' && (
+            )}
+            {weekData.entries.length > 0 && user.role === 'Payroll' && (
             <div className="timesheet-footer payroll-section">
-            <div>
+              <div>
               <p className="total-hours">Total Hours: {weekData.totalHours}h</p>
               <p className="payroll-info">
-              Estimated Pay: £{(weekData.totalHours * hourlyRate).toFixed(2)}
+                Estimated Pay: £{(weekData.totalHours * hourlyRate).toFixed(2)}
               </p>
+              </div>
+              {weekData.status === 'payroll_approved' ? (
+              <p className="approval-message">Payroll has been approved!</p>
+              ) : (
+              <button onClick={handlePayrollApproval} className="btn btn-success">
+                <CheckCircle className="btn-icon" />
+                Approve Payroll
+              </button>
+              )}
             </div>
-            <button onClick={handlePayrollApproval} className="btn btn-success">
-              <CheckCircle className="btn-icon" />
-              Approve Payroll
-            </button>
-            </div>
-          )}
-          {/* Edit Entry Modal */}
+            )}
+            {/* Edit Entry Modal */}
       {editingEntry && (
         <div className="modal-overlay" onClick={() => setEditingEntry(null)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
