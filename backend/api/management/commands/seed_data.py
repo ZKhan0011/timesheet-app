@@ -29,14 +29,26 @@ class Command(BaseCommand):
 
         # Create time entries
         entries_data = [
+            # Drafts
+            {'project_id': 1, 'date': '2026-03-28', 'hours': 4, 'description': 'Drafting design docs', 'status': 'draft'},
+            {'project_id': 3, 'date': '2026-03-28', 'hours': 2.5, 'description': 'Initial migration planning', 'status': 'draft'},
+            
+            # Submitted
             {'project_id': 1, 'date': '2026-03-24', 'hours': 8, 'description': 'Frontend component development', 'status': 'submitted'},
             {'project_id': 1, 'date': '2026-03-23', 'hours': 7.5, 'description': 'UI/UX implementation', 'status': 'submitted'},
+            {'project_id': 5, 'date': '2026-03-26', 'hours': 8, 'description': 'Onboarding exercises', 'status': 'submitted'},
+            
+            # Approved
             {'project_id': 2, 'date': '2026-03-22', 'hours': 6, 'description': 'React Native setup and configuration', 'status': 'approved'},
             {'project_id': 3, 'date': '2026-03-21', 'hours': 8, 'description': 'Database schema mapping', 'status': 'approved'},
             {'project_id': 2, 'date': '2026-03-20', 'hours': 7, 'description': 'API integration', 'status': 'approved'},
             {'project_id': 4, 'date': '2026-03-19', 'hours': 8, 'description': 'Penetration testing', 'status': 'approved'},
             {'project_id': 1, 'date': '2026-03-18', 'hours': 6.5, 'description': 'Code review and optimization', 'status': 'approved'},
             {'project_id': 5, 'date': '2026-03-17', 'hours': 4, 'description': 'Team training session', 'status': 'approved'},
+            
+            # Rejected
+            {'project_id': 4, 'date': '2026-03-25', 'hours': 8, 'description': 'Wait time for test environment', 'status': 'rejected'},
+            {'project_id': 2, 'date': '2026-03-27', 'hours': 10, 'description': 'Weekend overtime (unauthorized)', 'status': 'rejected'},
         ]
 
         for e in entries_data:
