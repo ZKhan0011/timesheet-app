@@ -61,4 +61,13 @@ To explore the frontend, you can use one of the following mock accounts (Passwor
 - **Consultant:** Username `consultant`
 - **Manager:** Username `manager`
 - **Payroll:** Username `payroll`
-- **Admin:** Username `admin`
+
+
+## Collaborators :
+- Khan1021 (personal) ,ZKhan0011 (enterprise account) - Zaynab Ahmed Khan 
+- ayo214 - Ayobamidele Eyitayo Abiola D Ajiga
+- Nathanc77 - Nathan Samuel Carpenter
+- naseem120106 - Mohammad Naseem Hussain
+- Valeriia Yakutovych
+- iioyd - Elie Abbawy Lloyd
+- Jduc1809 - Anh Duc Phan
