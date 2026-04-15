@@ -1,6 +1,6 @@
-# FDM Timesheet App
+# FDM Timesheet App prototype
 
-A full-stack timesheet application for the FDM consulting company. It features a React frontend (using Vite) and a Django REST API backend.
+A full-stack timesheet application for the FDM consulting company . It features a React frontend (using Vite) and a Django REST API backend.
 
 ## Prerequisites
 
