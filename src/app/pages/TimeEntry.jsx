@@ -89,8 +89,20 @@ export function TimeEntry() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!projectId || !hours || !description) {
-      toast.error('Please fill in all fields');
+    
+    if (!projectId) {
+      toast.error('Please select a project');
+      return;
+    }
+    
+    const hoursNum = parseFloat(hours);
+    if (!hours || isNaN(hoursNum) || hoursNum <= 0 || hoursNum > 24) {
+      toast.error('Please enter valid hours between 0.5 and 24');
+      return;
+    }
+    
+    if (!description || !description.trim()) {
+      toast.error('Please provide a description');
       return;
     }
 

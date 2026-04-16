@@ -1,3 +1,4 @@
+from datetime import date, timedelta
 from django.core.management.base import BaseCommand
 from api.models import Project, TimeEntry
 
@@ -7,6 +8,17 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.stdout.write('Seeding database...')
+
+        # Calculate dynamic dates
+        today = date.today()
+        # Monday of this week (0-indexed, where 0 is Monday)
+        this_monday = today - timedelta(days=today.weekday())
+        last_monday = this_monday - timedelta(days=7)
+        two_weeks_ago_monday = this_monday - timedelta(days=14)
+        three_weeks_ago_monday = this_monday - timedelta(days=21)
+
+        def fmt_dt(dt):
+            return dt.strftime('%Y-%m-%d')
 
         # Clear existing data
         TimeEntry.objects.all().delete()
@@ -29,26 +41,40 @@ class Command(BaseCommand):
 
         # Create time entries
         entries_data = [
-            # Drafts
-            {'project_id': 1, 'date': '2026-03-28', 'hours': 4, 'description': 'Drafting design docs', 'status': 'draft'},
-            {'project_id': 3, 'date': '2026-03-28', 'hours': 2.5, 'description': 'Initial migration planning', 'status': 'draft'},
+            # Drafts (This Week)
+            {'project_id': 1, 'date': fmt_dt(this_monday + timedelta(days=2)), 'hours': 3, 'description': 'Drafting design docs', 'status': 'draft'},
+            {'project_id': 3, 'date': fmt_dt(this_monday + timedelta(days=4)), 'hours': 2.5, 'description': 'Initial migration planning', 'status': 'draft'},
             
-            # Submitted
-            {'project_id': 1, 'date': '2026-03-24', 'hours': 8, 'description': 'Frontend component development', 'status': 'submitted'},
-            {'project_id': 1, 'date': '2026-03-23', 'hours': 7.5, 'description': 'UI/UX implementation', 'status': 'submitted'},
-            {'project_id': 5, 'date': '2026-03-26', 'hours': 8, 'description': 'Onboarding exercises', 'status': 'submitted'},
+            # Submitted (This Week & Last Week)
+            {'project_id': 1, 'date': fmt_dt(this_monday + timedelta(days=0)), 'hours': 8, 'description': 'Frontend component development', 'status': 'submitted'},
+            {'project_id': 1, 'date': fmt_dt(last_monday + timedelta(days=4)), 'hours': 4, 'description': 'UI/UX implementation', 'status': 'submitted'},
+            {'project_id': 5, 'date': fmt_dt(this_monday + timedelta(days=1)), 'hours': 2, 'description': 'Onboarding exercises', 'status': 'submitted'},
             
-            # Approved
-            {'project_id': 2, 'date': '2026-03-22', 'hours': 6, 'description': 'React Native setup and configuration', 'status': 'approved'},
-            {'project_id': 3, 'date': '2026-03-21', 'hours': 8, 'description': 'Database schema mapping', 'status': 'approved'},
-            {'project_id': 2, 'date': '2026-03-20', 'hours': 7, 'description': 'API integration', 'status': 'approved'},
-            {'project_id': 4, 'date': '2026-03-19', 'hours': 8, 'description': 'Penetration testing', 'status': 'approved'},
-            {'project_id': 1, 'date': '2026-03-18', 'hours': 6.5, 'description': 'Code review and optimization', 'status': 'approved'},
-            {'project_id': 5, 'date': '2026-03-17', 'hours': 4, 'description': 'Team training session', 'status': 'approved'},
+            # Approved (Last Week & This Week)
+            {'project_id': 2, 'date': fmt_dt(last_monday + timedelta(days=0)), 'hours': 6, 'description': 'React Native setup and configuration', 'status': 'approved'},
+            {'project_id': 3, 'date': fmt_dt(last_monday + timedelta(days=1)), 'hours': 8, 'description': 'Database schema mapping', 'status': 'approved'},
+            {'project_id': 2, 'date': fmt_dt(last_monday + timedelta(days=2)), 'hours': 4, 'description': 'API integration', 'status': 'approved'},
+            {'project_id': 4, 'date': fmt_dt(last_monday + timedelta(days=3)), 'hours': 8, 'description': 'Penetration testing', 'status': 'approved'},
+            {'project_id': 1, 'date': fmt_dt(this_monday + timedelta(days=0)), 'hours': 2.5, 'description': 'Code review and optimization', 'status': 'approved'},
+            {'project_id': 5, 'date': fmt_dt(this_monday + timedelta(days=1)), 'hours': 4, 'description': 'Team training session', 'status': 'approved'},
             
-            # Rejected
-            {'project_id': 4, 'date': '2026-03-25', 'hours': 8, 'description': 'Wait time for test environment', 'status': 'rejected'},
-            {'project_id': 2, 'date': '2026-03-27', 'hours': 10, 'description': 'Weekend overtime (unauthorized)', 'status': 'rejected'},
+            # Rejected (This Week)
+            {'project_id': 4, 'date': fmt_dt(this_monday + timedelta(days=3)), 'hours': 8, 'description': 'Wait time for test environment', 'status': 'rejected'},
+            {'project_id': 2, 'date': fmt_dt(last_monday + timedelta(days=2)), 'hours': 10, 'description': 'Weekend overtime (unauthorized)', 'status': 'rejected'},
+
+            # 2 Weeks Ago (Approved - Ready for payroll)
+            {'project_id': 1, 'date': fmt_dt(two_weeks_ago_monday + timedelta(days=0)), 'hours': 8, 'description': 'Full day workshop', 'status': 'approved'},
+            {'project_id': 1, 'date': fmt_dt(two_weeks_ago_monday + timedelta(days=1)), 'hours': 8, 'description': 'Client discovery', 'status': 'approved'},
+            {'project_id': 3, 'date': fmt_dt(two_weeks_ago_monday + timedelta(days=2)), 'hours': 8, 'description': 'Data mapping', 'status': 'approved'},
+            {'project_id': 2, 'date': fmt_dt(two_weeks_ago_monday + timedelta(days=3)), 'hours': 8, 'description': 'API Design', 'status': 'approved'},
+            {'project_id': 4, 'date': fmt_dt(two_weeks_ago_monday + timedelta(days=4)), 'hours': 8, 'description': 'Security prep', 'status': 'approved'},
+
+            # 3 Weeks Ago (Payroll Approved)
+            {'project_id': 4, 'date': fmt_dt(three_weeks_ago_monday + timedelta(days=0)), 'hours': 8, 'description': 'Kickoff meetings', 'status': 'payroll_approved'},
+            {'project_id': 3, 'date': fmt_dt(three_weeks_ago_monday + timedelta(days=1)), 'hours': 8, 'description': 'Requirements gathering', 'status': 'payroll_approved'},
+            {'project_id': 2, 'date': fmt_dt(three_weeks_ago_monday + timedelta(days=2)), 'hours': 8, 'description': 'Initial architecture', 'status': 'payroll_approved'},
+            {'project_id': 1, 'date': fmt_dt(three_weeks_ago_monday + timedelta(days=3)), 'hours': 8, 'description': 'UI Mockups', 'status': 'payroll_approved'},
+            {'project_id': 5, 'date': fmt_dt(three_weeks_ago_monday + timedelta(days=4)), 'hours': 8, 'description': 'Internal prep', 'status': 'payroll_approved'},
         ]
 
         for e in entries_data:

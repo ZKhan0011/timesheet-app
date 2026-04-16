@@ -32,10 +32,10 @@ export function Timesheets() {
       const totalHours = entries.reduce((sum, entry) => sum + parseFloat(entry.hours), 0);
       let status = 'draft';
       if (entries.length > 0) {
-        if (entries.some(e => e.status === 'rejected')) {
-          status = 'rejected';
-        } else if (entries.some(e => e.status === 'draft')) {
+        if (entries.some(e => e.status === 'draft')) {
           status = 'draft';
+        } else if (entries.some(e => e.status === 'rejected')) {
+          status = 'rejected';
         } else if (entries.some(e => e.status === 'submitted')) {
           status = 'submitted';
         } else if (entries.some(e => e.status === 'approved')) {
